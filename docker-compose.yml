@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  dev-db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./app:/usr/src/app
+    environment:
+      # - ENV_VAR_NAME=value
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Ashvatth@2006
+      POSTGRES_DB: nest
+    networks:
+      - app-network
+networks:
+  app-network:
