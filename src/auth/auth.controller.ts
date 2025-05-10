@@ -17,7 +17,7 @@ export class AuthController {
   @Post('signin')
   signin(@Body() dto: AuthDto) {
     console.log(dto);
-    console.log('Is DTO instance?', dto instanceof AuthDto);
+    //console.log('Is DTO instance?', dto instanceof AuthDto);
     return this.authService.signin(dto);
   }
 }
