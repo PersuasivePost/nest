@@ -8,14 +8,16 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('signup')
-  signup(
-    @Body() dto: AuthDto) {
-		//console.log('DTO received:', dto);
-		return this.authService.signup(dto);
+  signup(@Body() dto: AuthDto) {
+    console.log(dto);
+    console.log('Is DTO instance?', dto instanceof AuthDto);
+    return this.authService.signup(dto);
   }
 
   @Post('signin')
-  signin() {
-    return this.authService.signin();
+  signin(@Body() dto: AuthDto) {
+    console.log(dto);
+    console.log('Is DTO instance?', dto instanceof AuthDto);
+    return this.authService.signin(dto);
   }
 }
