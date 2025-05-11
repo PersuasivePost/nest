@@ -4,10 +4,16 @@ import { PrismaService } from 'src/prisma/prisma.service';
 //import { AuthDto } from './dto';
 import * as argon from 'argon2';
 import { AuthDto } from './dto/auth.dto';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable({})
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
 
   async signup(dto: AuthDto) {
     //genetate password hash
@@ -28,10 +34,12 @@ export class AuthService {
       });
 
       //delete user.hash;
-      const { hash: userHash, ...userWithoutHash } = user; // exclude the hash property
+      //const { hash: userHash, ...userWithoutHash } = user; // exclude the hash property
 
       // return the saved user
-      return userWithoutHash; // return the user object without the hash
+      //return userWithoutHash; // return the user object without the hash
+
+      return this.signTocken(user.id, user.email);
 
       //return { msg: 'I am signed up!', data: dto };
       // } catch (error) {
@@ -82,12 +90,35 @@ export class AuthService {
 
     //send back user
     //delete user.hash; // remove the hash property from the user object
-    const { hash: userHash, ...userWithoutHash } = user; // exclude the hash property
+    //const { hash: userHash, ...userWithoutHash } = user; // exclude the hash property
 
     // return the saved user
-    return userWithoutHash; // return the user object without the hash
+    //return userWithoutHash; // return the user object without the hash
     //return user;
 
     //return { msg: 'I am signed in!', data: dto };
+
+    return this.signTocken(user.id, user.email);
+  }
+
+  async signTocken(
+    userId: number,
+    email: string,
+  ): Promise<{ access_tocken: string }> {
+    const payload = {
+      sub: userId,
+      email,
+    };
+
+    const secret = this.config.get('JWT_SECRET');
+
+    const tocken = await this.jwt.signAsync(payload, {
+      expiresIn: '20m',
+      secret: secret,
+    });
+
+    return {
+      access_tocken: tocken,
+    };
   }
 }
