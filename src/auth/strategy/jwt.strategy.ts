@@ -52,10 +52,14 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(config: ConfigService) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+  constructor(
+    config: ConfigService,
+    private prisma: PrismaService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey:
@@ -68,7 +72,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    return payload; // You can customize this to fetch user data, etc.
+  async validate(payload: { sub: number; email: string }) {
+    console.log('Payload:', payload);
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: payload.sub,
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const { hash, ...userWithoutHash } = user;
+
+    return userWithoutHash; // You can customize this to fetch user data, etc.
   }
 }
