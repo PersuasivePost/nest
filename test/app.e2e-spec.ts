@@ -4,6 +4,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as pactum from 'pactum';
 import { AuthDto } from 'src/auth/dto/auth.dto';
+import { editUserDto } from 'src/user/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -124,7 +125,25 @@ describe('App e2e', () => {
       });
     });
 
-    describe('Edit user', () => {});
+    describe('Edit user', () => {
+      it('should edit user', () => {
+        const dto: editUserDto = {
+          firstName: 'Ashvatth Joshi',
+          email: 'ashvatth@example.com',
+        };
+        return pactum
+          .spec()
+          .patch('/users')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .withBody(dto)
+          .expectStatus(200)
+          .expectBodyContains(dto.firstName)
+          .expectBodyContains(dto.email)
+          .inspect();
+      });
+    });
   });
 
   describe('Bookmark', () => {
@@ -134,8 +153,10 @@ describe('App e2e', () => {
 
     describe('Get bookmark by id', () => {});
 
-    describe('Edit bookmark', () => {});
+    describe('Edit bookmark by id', () => {});
 
-    describe('Delete bookmark', () => {});
+    describe('Delete bookmark by id', () => {});
   });
 });
+
+// npx dotenv -e .env.test -- prisma studio
